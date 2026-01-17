@@ -1,0 +1,81 @@
+fastapi==0.115.8
+uvicorn==0.34.0
+aiofiles==24.1.0
+
+# DATA VALIDATION
+pydantic==2.10.6
+pydantic-settings==2.7.1
+
+# TESTING
+pytest==8.3.4
+pytest-asyncio==0.25.3
+
+# BACKGROUND TASKS
+google-cloud-tasks==2.19.0
+
+# LOGGING
+loguru==0.7.3
+
+# ENV VARS MANAGEMENT
+python-dotenv==1.0.1
+
+# DATABASE
+sqlmodel==0.0.22
+alembic==1.14.1
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+postgres==4.0
+cloud-sql-python-connector==1.17.0
+
+# SECURITY
+passlib==1.7.4
+PyJWT==2.10.1
+python-jose==3.3.0
+bcrypt==4.2.1
+python-dotenv
+
+# WEBSOCKETS
+websockets==14.2
+
+# ASYNC HTTP CLIENT
+httpx==0.28.1
+
+# RATE LIMITING
+slowapi==0.1.9
+
+# MONITORING
+prometheus-client==0.21.1
+
+# EMAIL
+aiosmtplib==4.0.0
+email-validator==2.2.0
+
+# FILE UPLOAD
+python-multipart==0.0.20
+
+# AWS
+boto3==1.36.16
+
+# DOCX
+python-docx==1.1.2
+
+# PDF
+pypdf==5.3.0
+
+# AI
+google-generativeai==0.8.4
+
+# SECRET MANAGEMENT
+google-cloud-secret-manager==2.23.0
+
+# TEMPORARY STORAGE
+google-cloud-storage==3.0.0
+
+# AUTH
+google-auth==2.38.0
+
+# FIREBASE
+firebase-admin==6.8.0
+
+# CLOUD RUN
+google-cloud-run==0.11.0

@@ -1,0 +1,19 @@
+steps:
+  # 1. Build and push the main application image
+  - name: "gcr.io/cloud-builders/docker" # Build fast api app image
+    args: ["build", "-t", "gcr.io/$PROJECT_ID/<IMAGE_NAME>", "."]
+    
+  - name: "gcr.io/cloud-builders/docker" # Push fast api app image
+    args: ["push", "gcr.io/$PROJECT_ID/<IMAGE_NAME>"]
+
+  # 2. Deploy the application
+  - name: "gcr.io/cloud-builders/gcloud"
+    args: ["run", "deploy", "<IMAGE_NAME>",
+          "--image", "gcr.io/$PROJECT_ID/<CLOUD_RUN_INSTANCE_NAME>",
+          "--region", "us-central1",
+          "--platform", "managed",
+          "--add-cloudsql-instances=<PROJECT_ID>:<REGION>:<INSTANCE_NAME>",
+          "--timeout", "1000s",
+          "--allow-unauthenticated",
+          "--set-env-vars", "ENV=dev"
+          ]
