@@ -3,15 +3,17 @@ from typing import List, Optional
 from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import joinedload
+from fastapi_cache.decorator import cache
 
 from app.schemas.adventure import EbookPageSchema
 from app.schemas.adventure import AdventurePreview
 from app.db.models import eBookPage, eBook, Adventure, Theme, AdventureTheme
-from app.utils.s3 import delete_s3_file
+from app.services.s3 import delete_s3_file
 from app.core.logging import logger
 from app.core.config import settings
 
-    
+
+@cache(expire=300)    
 async def get_tts_urls_for_ebook(
     ebook_id: str,
     session: AsyncSession

@@ -16,6 +16,12 @@ from app.utils.file import FileExtension, generate_unique_filename, get_file_con
 
 GCS_PUBLIC_OBJECT_BASE_URL = "https://storage.googleapis.com/"
 
+storage_admin_sa_key_json_str = settings.STORAGE_ADMIN_SERVICE_ACCOUNT_KEY
+storage_admin_sa_info = json.loads(storage_admin_sa_key_json_str)
+storage_admin_sa_credentials = service_account.Credentials.from_service_account_info(storage_admin_sa_info)
+project = storage_admin_sa_credentials.project_id
+
+    
 
 def delete_blob_from_gcs(blob_public_url: str) -> None:
     """Delete from blob from GCS by getting the blob and bucket names from its public GCS URL.
@@ -28,7 +34,10 @@ def delete_blob_from_gcs(blob_public_url: str) -> None:
     """
     
     try:
-        storage_client = storage.Client()
+        storage_client = storage.Client(
+            credentials=storage_admin_sa_credentials,
+            project=project
+        )
         parsed_url = urlparse(blob_public_url)
         
         # Extract bucket name & blob path
@@ -69,7 +78,10 @@ def get_file_metadata_from_gcs_public_url(gcs_public_url: str)-> dict:
     """
 
     try:
-        storage_client = storage.Client()
+        storage_client = storage.Client(
+            credentials=storage_admin_sa_credentials,
+            project=project
+        )
         parsed_url = urlparse(gcs_public_url)
         # Extract bucket name & blob path
         path_parts = parsed_url.path.lstrip("/").split("/", 1)
@@ -167,7 +179,10 @@ def get_gcs_upload_signed_url(
         dict: Contains the keys, "upload_url" and "public_url". Upload file to GCS via the upload URL, and access via the public URL once retrieved.
     """
     try:        
-        storage_client = storage.Client()
+        storage_client = storage.Client(
+            credentials=storage_admin_sa_credentials,
+            project=project
+        )
         
         bucket = storage_client.bucket(bucket_name) 
         blob = bucket.blob(f"{folder}/{filename}")

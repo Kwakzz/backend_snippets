@@ -27,6 +27,7 @@ psycopg2-binary==2.9.10
 postgres==4.0
 cloud-sql-python-connector==1.17.0
 
+
 # SECURITY
 passlib==1.7.4
 PyJWT==2.10.1
@@ -79,3 +80,7 @@ firebase-admin==6.8.0
 
 # CLOUD RUN
 google-cloud-run==0.11.0
+
+# CACHE
+redis==7.1.0
+fastapi-cache2==0.2.2

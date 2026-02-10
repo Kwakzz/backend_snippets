@@ -2,15 +2,15 @@ from typing import Optional, List
 from uuid import UUID
 from sqlmodel import select, func
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 
 from app.core.exceptions import ResourceNotFoundError
-from app.db.models import Adventure, AdventureProgress, Series
+from app.db.models import Adventure, AdventureProgress, Series, AdventureTheme, Quiz
 from app.core.logging import logger
 from app.schemas.adventure import AdventurePreview
 
-
 from app.utils.gcs import delete_blob_from_gcs
+from fastapi_cache.decorator import cache
 
 
 async def create_adventure(
@@ -173,3 +173,22 @@ async def get_series_adventures(
     except Exception as e:
         logger.error("Error getting series' adventures: {}", str(e), exc_info=True)
         raise
+    
+    
+@cache(expire=300)
+async def get_adventure_query_result(
+    adventure_id: UUID,
+    session: AsyncSession
+):
+    result = await session.exec(
+        select(Adventure)
+        .options(
+            joinedload(Adventure.ebook),
+            joinedload(Adventure.video),
+            joinedload(Adventure.series),
+            selectinload(Adventure.themes).selectinload(AdventureTheme.theme),
+            joinedload(Adventure.quiz).selectinload(Quiz.questions)
+        )
+        .where(Adventure.id == adventure_id)
+    )
+    return result.first()

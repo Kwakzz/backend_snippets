@@ -134,7 +134,7 @@ def validate_file_extension(
         ValidationError: If extension in filename is not in allowed_extensions.
     """
     
-    from app.utils.file import get_file_extension
+    from app.services.file import get_file_extension
 
     extension = get_file_extension(filename)
     if extension not in allowed_extensions:

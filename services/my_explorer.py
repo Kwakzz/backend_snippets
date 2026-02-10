@@ -28,10 +28,54 @@ async def get_quizzes_done_count(
         raise
     
     
+async def get_profile_average_quiz_score(
+    profile_id: UUID,
+    session: AsyncSession
+) -> float:
+    """
+    Calculate average quiz score for a profile.
+    Returns percentage (0-100) of correct answers across all finished attempts.
+    """
+    try:
+        # Get all finished attempts with their responses
+        result = await session.exec(
+            select(QuizAttempt)
+            .options(selectinload(QuizAttempt.responses))
+            .where(
+                (QuizAttempt.profile_id == profile_id) &
+                (QuizAttempt.status == QuizAttemptStatus.FINISHED.value )
+            )
+        )
+        finished_attempts = result.all()
+        
+        if not finished_attempts:
+            return 0.0
+        
+        total_correct = 0
+        total_questions = 0
+        
+        for attempt in finished_attempts:
+            for response in attempt.responses:
+                if response.is_correct is not None: 
+                    total_questions += 1
+                    if response.is_correct:
+                        total_correct += 1
+        
+        if total_questions == 0:
+            return 0.0
+            
+        average_score = (total_correct / total_questions) * 5
+        return round(average_score, 1)
+        
+    except Exception as e:
+        logger.error(f"Error calculating average score: {str(e)}")
+        raise
+    
+    
 async def get_ebooks_read_count(
     profile_id: UUID,
     session: AsyncSession
-) -> bool:
+) -> int:
     
     try:
         
@@ -39,15 +83,12 @@ async def get_ebooks_read_count(
             select(func.count(AdventureProgress.id))
             .where(
                 (AdventureProgress.profile_id == profile_id) &
-                (AdventureProgress.finished_at != None) &
-                (AdventureProgress.last_page_read != None)
+                (AdventureProgress.finished_at.isnot(None)) &
+                (AdventureProgress.last_page_read.isnot(None))
             )
         )
         count = result.first()
-        if count is not None:
-            return count
-        else:
-            return 0
+        return count or 0
         
     except Exception as e:
         raise
@@ -56,7 +97,7 @@ async def get_ebooks_read_count(
 async def get_videos_watched_count(
     profile_id: UUID,
     session: AsyncSession
-) -> bool:
+) -> int:
     
     try:
         
@@ -64,15 +105,12 @@ async def get_videos_watched_count(
             select(func.count(AdventureProgress.id))
             .where(
                 (AdventureProgress.profile_id == profile_id) &
-                (AdventureProgress.finished_at != None) &
-                (AdventureProgress.video_stopped_at != None)
+                (AdventureProgress.finished_at.isnot(None)) &
+                (AdventureProgress.video_stopped_at.isnot(None))
             )
         )
         count = result.first()
-        if count is not None:
-            return count
-        else:
-            return 0
+        return count or 0
         
     except Exception as e:
         raise
@@ -81,7 +119,7 @@ async def get_videos_watched_count(
 async def get_adventures_done_count(
     profile_id: UUID,
     session: AsyncSession
-) -> bool:
+) -> int:
     
     try:
         
@@ -89,14 +127,11 @@ async def get_adventures_done_count(
             select(func.count(AdventureProgress.id))
             .where(
                 (AdventureProgress.profile_id == profile_id) &
-                (AdventureProgress.finished_at != None)
+                (AdventureProgress.finished_at.isnot(None))
             )
         )
         count = result.first()
-        if count is not None:
-            return count
-        else:
-            return 0
+        return count or 0
         
     except Exception as e:
         raise

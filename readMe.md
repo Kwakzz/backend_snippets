@@ -35,14 +35,16 @@ An app that makes learning fun! Watch videos, read stories, and try cool DIY act
 
 ##  Tech Stack
 
-- **Language**: Python 3.11
+- **Language**: Python 3.12
 - **Web Framework**: FastAPI
 - **Database**: PostgreSQL (primary), Google CloudSQL
 - **Migrations** Alembic
 - **Authentication**: JWT, OAuth2 (Google)
 - **File Storage**: AWS S3  and Google Cloud Storage
+- **Caching**: FastAPICache and Redis
 - **Task Queue**: Google Cloud Tasks
-- **Deployment**: Google Cloud Run, Docker, Kubernetes, Uvicorn
+- **Cloud Jobs**: Google Cloud Jobs
+- **Deployment**: Google Cloud Run, Docker, Uvicorn
 - **Secret Management**: Google Secret Manager
 
 ---
@@ -50,35 +52,127 @@ An app that makes learning fun! Watch videos, read stories, and try cool DIY act
 ##  Project Structure
 
 ```
-wonderspaced api/
-├── alembic/                              # For database migrations
-│   ├── versions/                         # Contains migration files
-│   ├── env.py 
-│   ├── script.py.mako 
-├── app/                                  # Contains routers, configurations, utilities, tests and schemas.
-│   ├── api/                              # Contains API versions and their routers,
-│   ├── core/                             # Contains API settings, logging and security configurations and custom exception handling
-│   |       ├──config.py
-│   |       ├──logging.py
-│   |       ├──security.py
-│   |       ├──exceptions.py
-│   ├── db/                               # Contains models and async session initialization function
-│   |       ├──models.py
-│   |       ├──session.py
-│   ├── schemas/                          # Define response and request body structures
-│   ├── services/                         # Auth, email and firebase services
-│   ├── tests/                            # Define tests.
-│   ├── utils/                            # Utility functions
-│   |       ├──cloud_tasks.py             # Contains google cloud tasks. Meant to reduce latency for endpoints.
-│   |       ├──cloud_task_init.py         # Defines a function for creating cloud tasks endpoints
-├── .dockerignore                         # contains files and folders to be ignored when creating docker container.
-├── .gitignore                            # contains files and folders to be ignored when pushing to git.
-├── alembic.ini                           # defines configurations to initialize alembic when the migration command is run.
-├── cloudbuild.yaml                       # for defining the Docker container
-├── Dockerfile                            # contains steps for assembling a cloud run image
-├── Dockerfile.migrations                 # handles db migrations in Dockerized environment
-├── main.py                               # API entrypoint.
-├── requirements.txt                      # contains dependencies for the API
+.
+├── Dockerfile
+├── Dockerfile.migrations
+├── alembic
+│   ├── README
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions
+├── alembic.ini
+├── app
+│   ├── __init__.py
+│   ├── api
+│   │   └── v1
+│   │       └── routers
+│   │           ├── __init__.py
+│   │           ├── adventure_progress.py
+│   │           ├── adventures.py
+│   │           ├── auth.py
+│   │           ├── avatars.py
+│   │           ├── classrooms.py
+│   │           ├── ebooks.py
+│   │           ├── ebooks_tab.py
+│   │           ├── explore_tab.py
+│   │           ├── gcs_urls.py
+│   │           ├── my_explorer_tab.py
+│   │           ├── notifications.py
+│   │           ├── profiles.py
+│   │           ├── questions.py
+│   │           ├── quiz_attempts.py
+│   │           ├── quiz_responses.py
+│   │           ├── quizzes.py
+│   │           ├── redirects.py
+│   │           ├── series.py
+│   │           ├── stats.py
+│   │           ├── themes.py
+│   │           ├── users.py
+│   │           ├── videos.py
+│   │           └── videos_tab.py
+│   ├── core
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── exceptions.py
+│   │   ├── logging.py
+│   │   ├── rate_limiter.py
+│   │   └── security.py
+│   ├── db
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── session.py
+│   │   └── ts_vector.py
+│   ├── schemas
+│   │   ├── adventure.py
+│   │   ├── auth.py
+│   │   ├── avatar.py
+│   │   ├── classroom.py
+│   │   ├── ebook.py
+│   │   ├── explore.py
+│   │   ├── file_upload.py
+│   │   ├── my_explorer.py
+│   │   ├── notifications.py
+│   │   ├── profile.py
+│   │   ├── quiz.py
+│   │   ├── quiz_attempt.py
+│   │   ├── response.py
+│   │   ├── series.py
+│   │   ├── stats.py
+│   │   ├── theme.py
+│   │   ├── user.py
+│   │   └── video.py
+│   ├── services
+│   │   ├── __init__.py
+│   │   ├── adventure.py
+│   │   ├── auth.py
+│   │   ├── classroom.py
+│   │   ├── cloud_job_init.py
+│   │   ├── cloud_task_init.py
+│   │   ├── ebook.py
+│   │   ├── firebase_init.py
+│   │   ├── my_explorer.py
+│   │   ├── notifications.py
+│   │   ├── profile.py
+│   │   ├── quiz.py
+│   │   ├── s3.py
+│   │   ├── series.py
+│   │   ├── stats
+│   │   │   ├── __init__.py
+│   │   │   ├── adventure.py
+│   │   │   ├── content.py
+│   │   │   ├── profile.py
+│   │   │   └── users.py
+│   │   ├── theme.py
+│   │   ├── user.py
+│   │   └── video.py
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── conftest.py
+│   │   ├── logs
+│   │   │   └── app.log
+│   │   ├── test_profile.py
+│   │   └── test_users.py
+│   └── utils
+│       ├── __init__.py
+│       ├── cache.py
+│       ├── email.py
+│       ├── file.py
+│       ├── format_quiz_instruction.py
+│       ├── gcs.py
+│       └── general.py
+├── cloud-sql-proxy
+├── cloudbuild.dev.yaml
+├── cloudbuild.prod.yaml
+├── cors.json
+├── github
+│   └── workflows
+│       └── deploy.yml
+├── logs
+│   └── app.log
+├── main.py
+├── readMe.md
+├── requirements.txt
+└── secrets
 ```
 
 ---
@@ -195,7 +289,7 @@ async def run_async_migrations():
     engine = create_async_engine(
         "postgresql+asyncpg://",
         async_creator= getconn,
-        poolclass=pool.NullPool,
+        poolclass=pool.AsyncAdaptedQueuePool,
         echo=True 
     )
     
@@ -442,7 +536,7 @@ uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 ##  API Endpoints
 
 The API endpoints can be found in our Postman collection with sample requests and responses.
-Find the collection here: https://###.
+Find the collection here: https://web.postman.co/workspace/cf3d7243-175f-437a-83c2-2fc575c607a4.
 Only invited users can access the collection.
 
 ## Security Measures

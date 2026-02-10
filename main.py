@@ -3,6 +3,9 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from app.utils.cache import get_redis_client
 from contextlib import asynccontextmanager
 import uvicorn
 
@@ -42,14 +45,16 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    redis_client = await get_redis_client()
+    FastAPICache.init(RedisBackend(redis_client), prefix="fastapi-cache")
     yield
         
 
 app=FastAPI(
-    # lifespan=lifespan,
+    lifespan=lifespan,
     title="Wonderspaced API",
     version="1.0",
-    debug=True,
+    debug=True
 )
 
 init_rate_limiter(app)
